@@ -1,8 +1,12 @@
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import BranchPythonOperator
 
+from modules.rawdataextraction.rawdataeatraction import rawdataextraction
+from modules.rawdataextraction.sourcedata import sourcedata
+from modules.utils.loadstatusupdate import loadstatusupdate
 
-class pipeline:
+
+class pipeline(loadstatusupdate):
     @staticmethod
     def start_file_processing():
         task = EmptyOperator(task_id="started file processing")
@@ -10,7 +14,9 @@ class pipeline:
 
     def data_extract_from_source(self, object_name):
         task = BranchPythonOperator(
-            task_id="Extracting_Raw_Data_{}".format(object_name)
+            task_id="Extracting_Raw_Data_{}".format(object_name),
+            python_callable=sourcedata,
+            op_kwargs={"sourcetype": "gcs", "credentials": "credentials"}
         )
         return task
 
